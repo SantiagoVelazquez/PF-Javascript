@@ -25,6 +25,7 @@ function multiplicacion(a, b){
     return a * b;
 }
 
+
 // esto da el total a pagar
 switch (cuotas) {
     case 1:
