@@ -3,23 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+    <title>Simulador de préstamos</title>
 </head>
 <body>
     <header>
-        <h1>Simulador de prestamos</h1>
-        <nav>
-            <ul>
-                <li></li>
-                <li></li>
-            </ul>
-        </nav>
+        <img src="./multimedia/img/fastMoneyPremmium-verde.avif" alt="logo de fastmoney">
+        <h1>FastMoney</h1>
     </header>
     <main>
-        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloribus eveniet ducimus placeat eos rem nobis laboriosam ullam debitis excepturi architecto voluptatem consectetur, voluptates odit tenetur in numquam voluptate? Quibusdam, error!</p>
+        <div class="contenedorLista">
+            <form class="lista">
+                <h3>Solicitud de préstamos</h3>
+                <label for="monto">Monto a solicitar</label>
+                <input type="text" id="monto" placeholder="Ingrese el monto a solicitar">
+                <label for="cuotas">Cuotas</label>
+                <select id="cuotas">
+                    <option value="3">3 cuotas</option>
+                    <option value="6">6 cuotas</option>
+                    <option value="12">12 cuotas</option>
+                    <option value="18">18 cuotas</option>
+                </select>
+                <label for="comisionApertura">Comisión de apertura ($)</label>
+                <input type="text" id="comisionApertura" placeholder="Ingrese la comisión de apertura">
+                <label for="seguroPrestamo">Seguro de préstamo ($)</label>
+                <input type="text" id="seguroPrestamo" placeholder="Ingrese el seguro de préstamo">
+                <label for="gastosNotaria">Gastos de notaría ($)</label>
+                <input type="text" id="gastosNotaria" placeholder="Ingrese los gastos de notaría">
+
+                <button id="simular">Simular</button>
+            </form>
+        </div>
+        <div class="contenedorDetalle">
+            <ul id="listaPrestamos"></ul>
+            <ul id="resultado"></ul>
+        </div>
     </main>
     <footer>
-
     </footer>
     <script src="./index.js"></script>
 </body>

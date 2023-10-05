@@ -1,0 +1,119 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+header{
+    background-color: rgb(248, 248, 205);
+    color: #022c05be;
+    max-height: 85px;
+    border-radius: 8px;
+    border-bottom: solid 4px rgb(190, 212, 167); padding: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+header img{
+    max-height: 75px;
+    margin-left: 10px;
+}
+h1{
+    margin-top: 5px;
+    margin-right: 15px;
+}
+
+.contenedorLista {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lista {
+    background-color: #dffdb8;
+    border: solid 3px #024b06;
+    margin: 15px;
+    padding: 20px;
+    height: 750px;
+    width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; border-radius: 15px;
+}
+  
+  .lista h3 {
+    font-size: 40px;
+    text-align: center;
+  }
+  
+  .lista label {
+    margin: 8px 0;
+    font-weight: bold;
+  }
+  
+  .lista input {
+    padding: 5px;
+    background-color: rgb(248, 248, 205);
+    border: 2px solid rgb(37, 105, 35);
+    border-radius: 5px;
+  }
+  .lista select {
+    background-color: rgb(248, 248, 205);
+    padding: 5px;
+    border: 2px solid rgb(37, 105, 35);
+    border-radius: 5px;
+  }
+  
+  .lista button {
+    margin: 20px auto;
+    background-color: #024b06;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+
+  #listaPrestamos{
+    display: flex;
+    margin-right: 50px;
+    margin-left: 50px;
+    list-style: none;
+
+  }
+  #listaPrestamos li {
+    text-justify: distribute;
+    justify-content: center;
+    background-color: #297448;
+    border: solid 3px #024b06;
+    background-color: #dffdb8;
+    margin: 15px;
+    padding: 20px;
+    height: 300px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+}
+.eliminar{
+    background-color: #6e1408;
+    height: 28px;
+    margin-top: 25px;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align:end;
+}
+.editar{
+    height: 28px;
+    margin-top: 25px;
+    background-color: #464b02;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align:end;
+}

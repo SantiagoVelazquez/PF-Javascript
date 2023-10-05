@@ -1,62 +1,134 @@
-const edad = Number(prompt("Introduce tu edad: "));
+document.addEventListener("DOMContentLoaded", function () {
+    const formulario = document.querySelector(".lista");
+    const listaPrestamos = document.getElementById("listaPrestamos");
 
-if (edad < 18) {
-    console.log("Lo siento, tienes que ser mayor de edad para poder solicitar un préstamo.");
-} else {
-    const numPrestamos = Number(prompt("¿Cuántos préstamos deseas simular?"));
+    function calcularCuotaMensual(monto, tasaMensual, plazo) {
+        return (monto * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -plazo));
+    }
 
-    if (isNaN(numPrestamos) || numPrestamos <= 0) {
-        console.log("Por favor, introduce un número válido de préstamos.");
-    } else {
-        const prestamos = []; // Array para almacenar detalles de préstamos
-
-        for (let i = 0; i < numPrestamos; i++) {
-            console.log(`--- Detalles del Préstamo ${i + 1} ---`);
-
-            const totalSolicitado = Number(prompt(`Introduce el monto a solicitar para el Préstamo ${i + 1}: `));
-
-            let cuotas;
-            while (true) {
-                cuotas = Number(prompt(`Selecciona la cantidad de cuotas para el Préstamo ${i + 1}: 1, 3, 6, 12 o 18`));
-                if ([1, 3, 6, 12, 18].includes(cuotas)) {
-                    break;
-                } else {
-                    console.log("Por el momento solo hay planes de 1, 3, 6, 12 y 18 cuotas.");
-                }
-            }
-
-            const tasaInteresAnual = Number(prompt(`Introduce la tasa de interés anual en porcentaje para el Préstamo ${i + 1}: `));
-            const tasaInteresMensual = tasaInteresAnual / 12 / 100;
-
-            function calcularCuotaMensual(monto, tasaMensual, plazo) {
-                const cuota = (monto * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -plazo));
-                return cuota;
-            }
-
-            function calcularTotalAPagar(monto, cuotaMensual, plazo) {
-                const total = cuotaMensual * plazo;
-                return total;
-            }
-
-            prestamos.push({
-                monto: totalSolicitado,
-                cuotas: cuotas,
-                tasaInteres: tasaInteresAnual,
-            });
-
-            const cuotaMensual = calcularCuotaMensual(totalSolicitado, tasaInteresMensual, cuotas);
-            const totalAPagar = calcularTotalAPagar(totalSolicitado, cuotaMensual, cuotas);
-
-            console.log(`El total a pagar en ${cuotas} cuotas para el Préstamo ${i + 1} es de $${totalAPagar.toFixed(2)}.`);
-        }
-
-        // Detalle de todos los préstamos
-        prestamos.forEach((prestamo, index) => {
-            console.log(`Resumen del Préstamo ${index + 1}:`);
-            console.log(`- Monto solicitado: $${prestamo.monto}`);
-            console.log(`- Cuotas: ${prestamo.cuotas}`);
-            console.log(`- Tasa de interés anual: ${prestamo.tasaInteres}%`);
+    function mostrarResultado(monto, cuotas, cuotaMensual, tasaInteres, comision, seguro, notaria) {
+        const listaPrestamos = document.getElementById("listaPrestamos");
+    
+        const resultadoElemento = document.createElement("div");
+        resultadoElemento.classList.add("detalle");
+        resultadoElemento.innerHTML = `
+            Monto solicitado: $${monto}, Cuotas: ${cuotas}, Cuota mensual: $${cuotaMensual.toFixed(2)}, Tasa de interés anual: ${tasaInteres}%, Comisión de apertura: $${comision}, Seguro de préstamo: $${seguro}, Gastos de notaría: $${notaria}
+        `;
+    
+        listaPrestamos.appendChild(resultadoElemento);
+        guardarPrestamo({
+            monto,
+            cuotas,
+            tasaInteres,
+            comision,
+            seguro,
+            notaria
         });
     }
-}
+    
+    function mostrarListaPrestamos() {
+    const listaPrestamosGuardados = obtenerPrestamos();
+    listaPrestamos.innerHTML = "";
 
+    listaPrestamosGuardados.forEach((prestamo, index) => {
+        const cuotaMensual = calcularCuotaMensual(prestamo.monto, prestamo.tasaInteres / 12 / 100, prestamo.cuotas);
+        const montoTotal = prestamo.monto + prestamo.comision + prestamo.seguro + prestamo.notaria;
+        const li = document.createElement("li");
+        li.innerHTML = `
+            -Monto solicitado: $${montoTotal},<br>
+            -Cuotas: ${prestamo.cuotas},<br> 
+            -Cuota mensual: $${cuotaMensual.toFixed(2)},<br> 
+            -Tasa de interés anual: ${prestamo.tasaInteres}%, <br>
+            -Comisión de apertura: $${prestamo.comision}, <br>
+            -Seguro de préstamo: $${prestamo.seguro}, <br>
+            -Gastos de notaría: $${prestamo.notaria}<br>
+            <button class="editar" data-index="${index}">Editar</button>
+            <button class="eliminar" data-index="${index}">Eliminar</button>
+        `;
+        listaPrestamos.appendChild(li);
+    });
+}
+    function guardarPrestamo(prestamo) {
+        const listaPrestamosGuardados = obtenerPrestamos();
+        listaPrestamosGuardados.push(prestamo);
+        localStorage.setItem("prestamos", JSON.stringify(listaPrestamosGuardados));
+    }
+
+    function obtenerPrestamos() {
+        return JSON.parse(localStorage.getItem("prestamos")) || [];
+    }
+    function obtenerTasaInteres(cuotas) {
+        let tasaInteres = 0;
+
+        switch (cuotas) {
+            case 3:
+                tasaInteres = 5; 
+                break;
+            case 6:
+                tasaInteres = 7; 
+                break;
+            case 12:
+                tasaInteres = 9; 
+                break;
+            case 18:
+                tasaInteres = 11; 
+                break;
+            default:
+                tasaInteres = 10; 
+        }
+
+        return tasaInteres;
+    }
+
+    formulario.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const monto = parseFloat(document.getElementById("monto").value);
+        const cuotas = parseInt(document.getElementById("cuotas").value);
+        const comision = parseFloat(document.getElementById("comisionApertura").value);
+        const seguro = parseFloat(document.getElementById("seguroPrestamo").value);
+        const notaria = parseFloat(document.getElementById("gastosNotaria").value);
+
+        if (isNaN(monto) || isNaN(cuotas) || isNaN(comision) || isNaN(seguro) || isNaN(notaria) || monto <= 0 || comision < 0 || seguro < 0 || notaria < 0) {
+            alert("Por favor, ingrese datos válidos.");
+            return;
+        }
+        const tasaInteres = obtenerTasaInteres(cuotas);
+        const tasaInteresMensual = tasaInteres / 12 / 100;
+        const cuotaMensual = calcularCuotaMensual(monto, tasaInteresMensual, cuotas);
+
+        mostrarResultado(monto, cuotas, cuotaMensual, tasaInteres, comision, seguro, notaria);
+
+        formulario.reset();
+        mostrarListaPrestamos();
+    });
+
+    listaPrestamos.addEventListener("click", function (e) {
+        if (e.target.classList.contains("editar")) {
+            const index = e.target.getAttribute("data-index");
+            const prestamos = obtenerPrestamos();
+            const prestamo = prestamos[index];
+            if (prestamo) {
+                // Llena el formulario con los valores del préstamo para editar
+                document.getElementById("monto").value = prestamo.monto;
+                document.getElementById("cuotas").value = prestamo.cuotas;
+                document.getElementById("comisionApertura").value = prestamo.comision;
+                document.getElementById("seguroPrestamo").value = prestamo.seguro;
+                document.getElementById("gastosNotaria").value = prestamo.notaria;
+
+                prestamos.splice(index, 1);
+                localStorage.setItem("prestamos", JSON.stringify(prestamos));
+                mostrarListaPrestamos();
+            }
+        } else if (e.target.classList.contains("eliminar")) {
+            const index = e.target.getAttribute("data-index");
+            const prestamos = obtenerPrestamos();
+            if (index >= 0 && index < prestamos.length) {
+                prestamos.splice(index, 1);
+                localStorage.setItem("prestamos", JSON.stringify(prestamos));
+                mostrarListaPrestamos();
+            }
+        }
+    });
+    mostrarListaPrestamos();
+});
