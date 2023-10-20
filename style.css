@@ -117,3 +117,6 @@ h1{
     cursor: pointer;
     text-align:end;
 }
+.detalle{
+  text-align: justify;
+}

@@ -27,27 +27,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function mostrarListaPrestamos() {
-    const listaPrestamosGuardados = obtenerPrestamos();
-    listaPrestamos.innerHTML = "";
+        const listaPrestamosGuardados = obtenerPrestamos();
+        listaPrestamos.innerHTML = "";
 
-    listaPrestamosGuardados.forEach((prestamo, index) => {
-        const cuotaMensual = calcularCuotaMensual(prestamo.monto, prestamo.tasaInteres / 12 / 100, prestamo.cuotas);
-        const montoTotal = prestamo.monto + prestamo.comision + prestamo.seguro + prestamo.notaria;
-        const li = document.createElement("li");
-        li.innerHTML = `
-            -Monto solicitado: $${montoTotal},<br>
-            -Cuotas: ${prestamo.cuotas},<br> 
-            -Cuota mensual: $${cuotaMensual.toFixed(2)},<br> 
-            -Tasa de interés anual: ${prestamo.tasaInteres}%, <br>
-            -Comisión de apertura: $${prestamo.comision}, <br>
-            -Seguro de préstamo: $${prestamo.seguro}, <br>
-            -Gastos de notaría: $${prestamo.notaria}<br>
-            <button class="editar" data-index="${index}">Editar</button>
-            <button class="eliminar" data-index="${index}">Eliminar</button>
-        `;
-        listaPrestamos.appendChild(li);
-    });
-}
+        listaPrestamosGuardados.forEach((prestamo, index) => {
+            const cuotaMensual = calcularCuotaMensual(prestamo.monto, prestamo.tasaInteres / 12 / 100, prestamo.cuotas);
+            const montoTotal = prestamo.monto + prestamo.comision + prestamo.seguro + prestamo.notaria;
+            const li = document.createElement("li");
+            li.innerHTML = `
+                -Monto solicitado: $${montoTotal},<br>
+                -Cuotas: ${prestamo.cuotas},<br> 
+                -Cuota mensual: $${cuotaMensual.toFixed(2)},<br> 
+                -Tasa de interés anual: ${prestamo.tasaInteres}%, <br>
+                -Comisión de apertura: $${prestamo.comision}, <br>
+                -Seguro de préstamo: $${prestamo.seguro}, <br>
+                -Gastos de notaría: $${prestamo.notaria}<br>
+                <button class="editar" data-index="${index}">Editar</button>
+                <button class="eliminar" data-index="${index}">Eliminar</button>
+            `;
+            listaPrestamos.appendChild(li);
+        });
+    }
+
     function guardarPrestamo(prestamo) {
         const listaPrestamosGuardados = obtenerPrestamos();
         listaPrestamosGuardados.push(prestamo);
@@ -57,59 +58,76 @@ document.addEventListener("DOMContentLoaded", function () {
     function obtenerPrestamos() {
         return JSON.parse(localStorage.getItem("prestamos")) || [];
     }
+
     function obtenerTasaInteres(cuotas) {
-        let tasaInteres = 0;
-
-        switch (cuotas) {
-            case 3:
-                tasaInteres = 5; 
-                break;
-            case 6:
-                tasaInteres = 7; 
-                break;
-            case 12:
-                tasaInteres = 9; 
-                break;
-            case 18:
-                tasaInteres = 11; 
-                break;
-            default:
-                tasaInteres = 10; 
-        }
-
-        return tasaInteres;
+        return fetch("./index.json")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al obtener tasas de interés");
+                }
+                return response.json();
+            })
+            .then(tasas => {
+                if (cuotas in tasas) {
+                    return tasas[cuotas];
+                } else {
+                    throw new Error("Tasa de interés no encontrada");
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                return 10;
+            });
     }
 
-    formulario.addEventListener("submit", function (e) {
+    formulario.addEventListener("submit", async function (e) {
         e.preventDefault();
-
+    
         const monto = parseFloat(document.getElementById("monto").value);
         const cuotas = parseInt(document.getElementById("cuotas").value);
         const comision = parseFloat(document.getElementById("comisionApertura").value);
         const seguro = parseFloat(document.getElementById("seguroPrestamo").value);
         const notaria = parseFloat(document.getElementById("gastosNotaria").value);
-
-        if (isNaN(monto) || isNaN(cuotas) || isNaN(comision) || isNaN(seguro) || isNaN(notaria) || monto <= 0 || comision < 0 || seguro < 0 || notaria < 0) {
-            alert("Por favor, ingrese datos válidos.");
+        const edad = parseInt(document.getElementById("edad").value);
+    
+        if (isNaN(monto) || isNaN(cuotas) || isNaN(comision) || isNaN(seguro) || isNaN(notaria) || isNaN(edad) || monto <= 0 || comision < 0 || seguro < 0 || notaria < 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Por favor, ingrese datos válidos o complete los campos.',
+            });
             return;
         }
-        const tasaInteres = obtenerTasaInteres(cuotas);
-        const tasaInteresMensual = tasaInteres / 12 / 100;
-        const cuotaMensual = calcularCuotaMensual(monto, tasaInteresMensual, cuotas);
+    
+        if (edad < 18) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Lo siento, debes ser mayor de 18 años para simular un préstamo.',
+            });
+            return;
+        }
 
-        mostrarResultado(monto, cuotas, cuotaMensual, tasaInteres, comision, seguro, notaria);
-
-        formulario.reset();
-        mostrarListaPrestamos();
+        try {
+            const tasaInteres = await obtenerTasaInteres(cuotas);
+            const tasaInteresMensual = tasaInteres / 12 / 100;
+            const cuotaMensual = calcularCuotaMensual(monto, tasaInteresMensual, cuotas);
+    
+            mostrarResultado(monto, cuotas, cuotaMensual, tasaInteres, comision, seguro, notaria);
+    
+            formulario.reset();
+            mostrarListaPrestamos();
+        } catch (error) {
+            console.error(error);
+        }
     });
-
+    
     listaPrestamos.addEventListener("click", function (e) {
         if (e.target.classList.contains("editar")) {
             const index = e.target.getAttribute("data-index");
             const prestamos = obtenerPrestamos();
             const prestamo = prestamos[index];
             if (prestamo) {
-                // Llena el formulario con los valores del préstamo para editar
                 document.getElementById("monto").value = prestamo.monto;
                 document.getElementById("cuotas").value = prestamo.cuotas;
                 document.getElementById("comisionApertura").value = prestamo.comision;
